@@ -1,13 +1,15 @@
 package coffeemachine
 
 import com.google.common.truth.Truth.assertThat
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
-import org.mockito.kotlin.verify
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 class CoffeeMachineTest {
 
-    private val drinkMaker = mock<DrinkMaker>()
+    private val drinkMaker = mockk<DrinkMaker>(relaxed = true)
 
     @Test
     fun `Given a CoffeeMachine when coffee is selected it should print coffee`() {
@@ -16,7 +18,20 @@ class CoffeeMachineTest {
         coffeeMachine.select(DrinkType.COFFEE)
         coffeeMachine.makeDrink()
 
-        verify(drinkMaker).invoke("C::")
+        verify(exactly = 1) {
+            drinkMaker.invoke("C::")
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(DrinkType::class)
+    fun `Given a drink it should invoke the correct command`(drinkType: DrinkType) {
+        val coffeeMachine = CoffeeMachine(drinkMaker)
+        coffeeMachine.select(drinkType)
+        coffeeMachine.makeDrink()
+        verify(exactly = 1) {
+            drinkMaker.invoke("${drinkType.value}::")
+        }
     }
 
     @Test
@@ -27,7 +42,9 @@ class CoffeeMachineTest {
         coffeeMachine.addSugar()
         coffeeMachine.makeDrink()
 
-        verify(drinkMaker).invoke("C:1:0")
+        verify(exactly = 1) {
+            drinkMaker.invoke("C:1:0")
+        }
     }
 
     @Test
@@ -37,7 +54,9 @@ class CoffeeMachineTest {
         coffeeMachine.select(DrinkType.TEA)
         coffeeMachine.makeDrink()
 
-        verify(drinkMaker).invoke("T::")
+        verify(exactly = 1) {
+            drinkMaker.invoke("T::")
+        }
     }
 
     @Test
@@ -47,7 +66,9 @@ class CoffeeMachineTest {
         coffeeMachine.select(DrinkType.CHOCOLATE)
         coffeeMachine.makeDrink()
 
-        verify(drinkMaker).invoke("H::")
+        verify(exactly = 1) {
+            drinkMaker.invoke("H::")
+        }
     }
 
     @Test
